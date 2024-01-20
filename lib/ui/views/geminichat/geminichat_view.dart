@@ -52,49 +52,49 @@ class GeminichatView extends StatelessWidget {
                                 content: Text('Message copied to clipboard')),
                           );
                         },
-                        child: Align(
-                          alignment: viewModel.calculateMessageAlignment(index),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: viewModel.chatMessages[index]["role"] ==
-                                      "User"
-                                  ? Colors.blue
-                                  : Colors.green,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  viewModel.chatMessages[index]['message'],
-                                  style: const TextStyle(color: Colors.white),
+                        child: Container(
+                          alignment:
+                              viewModel.chatMessages[index]["role"] == "User"
+                                  ? Alignment.centerLeft
+                                  : Alignment.centerRight,
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color:
+                                viewModel.chatMessages[index]["role"] == "User"
+                                    ? Colors.blue
+                                    : Colors.green,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                viewModel.chatMessages[index]['message'],
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              if (viewModel.chatMessages[index]["imageUrl"]
+                                  .toString()
+                                  .isNotEmpty)
+                                Image.file(
+                                  File(viewModel.chatMessages[index]
+                                      ["imageUrl"]),
+                                  width: 90,
+                                  height: 90,
                                 ),
-                                if (viewModel.chatMessages[index]["imageUrl"]
-                                    .toString()
-                                    .isNotEmpty)
-                                  Image.file(
-                                    File(viewModel.chatMessages[index]
-                                        ["imageUrl"]),
-                                    width: 90,
-                                    height: 90,
+                              if (viewModel.chatMessages[index]["timestamp"] !=
+                                  null)
+                                Text(
+                                  viewModel.chatMessages[index]["timestamp"]
+                                      .toString(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
                                   ),
-                                if (viewModel.chatMessages[index]
-                                        ["timestamp"] !=
-                                    null)
-                                  Text(
-                                    viewModel.chatMessages[index]["timestamp"]
-                                        .toString(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                              ],
-                            ),
+                                ),
+                            ],
                           ),
                         ),
                       );
@@ -171,19 +171,21 @@ class GeminichatView extends StatelessWidget {
                             ? const CircularProgressIndicator()
                             : const Icon(Icons.send),
                         onPressed: () async {
-                          if (viewModel.usermsg.text.isNotEmpty &&
-                              viewModel.imageFile == null) {
-                            await viewModel
-                                .sendMessageOnlyText(viewModel.usermsg.text);
-                            viewModel.usermsg.clear();
-                          } else if (viewModel.imageFile != null) {
-                            viewModel.getImagePath();
-                            // await viewModel.uploadImageToFirestorega();
-                            await viewModel
-                                .sendMessagewithImage(viewModel.usermsg.text);
-                            viewModel.usermsg.clear();
+                          if (!viewModel.isBusy) {
+                            if (viewModel.usermsg.text.isNotEmpty &&
+                                viewModel.imageFile == null) {
+                              await viewModel
+                                  .sendMessageOnlyText(viewModel.usermsg.text);
+                              viewModel.usermsg.clear();
+                            } else if (viewModel.imageFile != null) {
+                              viewModel.getImagePath();
+                              // await viewModel.uploadImageToFirestorega();
+                              await viewModel
+                                  .sendMessagewithImage(viewModel.usermsg.text);
+                              viewModel.usermsg.clear();
 
-                            viewModel.imageFile = null;
+                              viewModel.imageFile = null;
+                            }
                           }
                         },
                       ),

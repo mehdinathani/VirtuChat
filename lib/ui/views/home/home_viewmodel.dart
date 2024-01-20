@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:virtuchat/app/app.bottomsheets.dart';
 import 'package:virtuchat/app/app.dialogs.dart';
@@ -17,6 +19,10 @@ class HomeViewModel extends BaseViewModel {
   final _firestoreStoreService = locator<FirebaseFirestoreService>();
   final _firebaseAuthService = locator<FirebaseAuthService>();
   final _promptService = locator<PromptService>();
+  String currentUserName = '';
+  String currentUserDPUrl = "";
+  String currentUserEmail = "";
+  late User user;
 
   List<String> _promptList = []; // Add this list to store prompts
   List<String> get promptList => _promptList;
@@ -128,5 +134,47 @@ class HomeViewModel extends BaseViewModel {
   deletePrompt(promptName) {
     String uid = _firebaseAuthService.auth.currentUser?.uid ?? '';
     _firestoreStoreService.deletePrompt(uid, promptName);
+  }
+
+  logout() {
+    _firebaseAuthService.signOut();
+    _navigationService.navigateToLoginView();
+  }
+
+  updateCurrentUSerData() async {
+    user = _firebaseAuthService.auth.currentUser!;
+    if (user != null) {
+      // Fetch user details from Firestore using the UID
+      DocumentSnapshot userDoc =
+          await _firestoreStoreService.getUserDoc(user.uid);
+
+      if (userDoc.exists) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+
+        currentUserName = userData['displayName'] ?? "User";
+        currentUserDPUrl = userData['photoURL'] ?? "";
+        currentUserEmail = userData['email'] ?? "";
+
+        rebuildUi();
+      }
+    }
+  }
+
+  updateCurrentUsername(context) async {
+    setBusy(true);
+    user = _firebaseAuthService.auth.currentUser!;
+    await _firebaseAuthService.updateUserNameDialog(context, user);
+    setBusy(false);
+    rebuildUi();
+  }
+
+  updateCurrentDP(context) async {
+    user = _firebaseAuthService.auth.currentUser!;
+    await _firebaseAuthService.updateUserProfilePicture(context, user);
+    rebuildUi();
+  }
+
+  init() {
+    updateCurrentUSerData();
   }
 }

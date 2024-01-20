@@ -160,4 +160,8 @@ class FirebaseFirestoreService {
         .doc(promptName)
         .delete();
   }
+
+  Future<DocumentSnapshot> getUserDoc(String uid) async {
+    return await _firestore.collection('users').doc(uid).get();
+  }
 }

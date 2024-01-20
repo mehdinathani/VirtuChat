@@ -81,20 +81,24 @@ class GeminichatViewModel extends BaseViewModel {
   }
 
   sendMessageOnlyText(String query) async {
+    setBusy(true);
     // Add the user's message to Firebase Firestore
     await addMessage(query, "User");
 
     // Use the GeminiService to generate a response and add it to Firebase Firestore
     await _geminiService.fromText(query: query, promptName: currentPrompt);
+    setBusy(false);
   }
 
   sendMessagewithImage(String query) async {
+    setBusy(true);
     // Add the user's message to Firebase Firestore
     await addMessage(query, "User");
 
     // Use the GeminiService to generate a response and add it to Firebase Firestore
     await _geminiService.fromTextAndImage(
         query: query, image: imageFile!, promptName: currentPrompt);
+    setBusy(false);
   }
 
 // Helper method to add the user's message to Firebase Firestore

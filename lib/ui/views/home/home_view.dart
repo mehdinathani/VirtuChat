@@ -13,6 +13,90 @@ class HomeView extends StackedView<HomeViewModel> {
     Widget? child,
   ) {
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text("VirtuChat"),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      viewModel.updateCurrentDP(context);
+                    },
+                    child: CircleAvatar(
+                      backgroundImage: viewModel.currentUserDPUrl.isNotEmpty
+                          ? NetworkImage(viewModel.currentUserDPUrl)
+                          : null,
+                      backgroundColor: viewModel.currentUserDPUrl.isNotEmpty
+                          ? Colors.transparent
+                          : Colors.black,
+                      // Add your avatar logic here
+                      // Example: backgroundImage: NetworkImage('your_avatar_url'),
+                      radius: 30,
+                      child: viewModel.currentUserDPUrl.isEmpty
+                          ? Text(
+                              viewModel.currentUserName.isNotEmpty
+                                  ? viewModel.currentUserName[0]
+                                  : 'U',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),
+                            )
+                          : null,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () {
+                      viewModel.updateCurrentUsername(context);
+                    },
+                    child: Text(
+                      viewModel.currentUserName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    viewModel.currentUserEmail,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Settings'),
+              onTap: () {
+                // Add your settings logic here
+                // Example: viewModel.navigateToSettings();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Logout'),
+              onTap: () {
+                // Add your logout logic here
+                viewModel.logout();
+              },
+            ),
+          ],
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -41,19 +125,21 @@ class HomeView extends StackedView<HomeViewModel> {
               return ListView.builder(
                 itemCount: promptList.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: GestureDetector(
-                        onTap: () async {
-                          viewModel.updateCurrentPrompt(promptList[index]);
-                          await viewModel.navigateToGeminiChat();
-                        },
-                        child: Text(promptList[index])),
-                    trailing: IconButton(
-                        onPressed: () async {
-                          await viewModel.deletePrompt(promptList[index]);
-                        },
-                        icon: const Icon(Icons.delete)),
-                    // Add any other information you want to display
+                  return GestureDetector(
+                    onTap: () async {
+                      viewModel.updateCurrentPrompt(promptList[index]);
+                      await viewModel.navigateToGeminiChat();
+                    },
+                    child: ListTile(
+                      tileColor: const Color(0xff17C3CE),
+                      title: Text(promptList[index]),
+                      trailing: IconButton(
+                          onPressed: () async {
+                            await viewModel.deletePrompt(promptList[index]);
+                          },
+                          icon: const Icon(Icons.delete)),
+                      // Add any other information you want to display
+                    ),
                   );
                 },
               );
@@ -62,6 +148,7 @@ class HomeView extends StackedView<HomeViewModel> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xff17C3CE),
         onPressed: () {
           // Add your logic to handle the press of the add button
           // For example, showing a dialog to create a new prompt
@@ -70,6 +157,12 @@ class HomeView extends StackedView<HomeViewModel> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  @override
+  void onViewModelReady(HomeViewModel viewModel) {
+    viewModel.init();
+    super.onViewModelReady(viewModel);
   }
 
   @override
