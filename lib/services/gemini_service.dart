@@ -22,7 +22,8 @@ class GeminiService {
   Future<void> fromText(
       {required String query, required String promptName}) async {
     DateTime now = DateTime.now();
-    String timestamp = "${now.hour}:${now.minute}";
+    String timestamp =
+        "${now.day}/${now.month} ${now.hour}:${now.minute}:${now.millisecond}";
 
     try {
       var value = await gemini.generateFromText(query);
@@ -42,6 +43,25 @@ class GeminiService {
     } catch (error, stackTrace) {
       // Handle errors
       print('Error generating message: $error');
+      // Provide a fallback message
+      Map<String, dynamic> geminiMessage = {
+        "role": "Gemini",
+        "text": "Sorry, I am a chat bot AI...",
+        "timestamp": timestamp,
+        "image": null,
+      };
+      // Get the current user UID
+      String uid = _firebaseAuthService.getCurrentUser()?.uid ?? '';
+      // Store the fallback message in Firestore
+      await _firestoreService.addMessage(
+        uid,
+        promptName,
+        'Gemini',
+        "Sorry! I M VirtuChat Bot. I can't help you with this. Please try with some different Words.",
+        "",
+        'Gemini',
+        timestamp,
+      );
     }
   }
 
@@ -50,7 +70,8 @@ class GeminiService {
       required File image,
       required String promptName}) async {
     DateTime now = DateTime.now();
-    String timestamp = "${now.hour}:${now.minute}";
+    String timestamp =
+        "${now.day}/${now.month} ${now.hour}:${now.minute}:${now.millisecond}";
     try {
       var value =
           await gemini.generateFromTextAndImages(query: query, image: image);
@@ -70,6 +91,25 @@ class GeminiService {
     } catch (error, stackTrace) {
       // Handle errors
       print('Error generating message: $error');
+      // Provide a fallback message
+      Map<String, dynamic> geminiMessage = {
+        "role": "Gemini",
+        "text": "Sorry, I am a chat bot AI...",
+        "timestamp": timestamp,
+        "image": null,
+      };
+      // Get the current user UID
+      String uid = _firebaseAuthService.getCurrentUser()?.uid ?? '';
+      // Store the fallback message in Firestore
+      await _firestoreService.addMessage(
+        uid,
+        promptName,
+        'Gemini',
+        "Sorry! I M VirtuChat Bot. I can't help you with this. Please try with some different Image.",
+        "",
+        'Gemini',
+        timestamp,
+      );
     }
   }
 }

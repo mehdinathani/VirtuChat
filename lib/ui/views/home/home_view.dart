@@ -122,7 +122,8 @@ class HomeView extends StackedView<HomeViewModel> {
               }
 
               // Display the prompt list using ListView.builder
-              return ListView.builder(
+              return ListView.separated(
+                separatorBuilder: (context, index) => const Divider(),
                 itemCount: promptList.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(

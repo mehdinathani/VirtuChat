@@ -11,6 +11,8 @@ import 'package:virtuchat/services/gemini_service.dart';
 import 'package:virtuchat/services/prompt_service.dart';
 
 class GeminichatViewModel extends BaseViewModel {
+  final FocusNode messageFocusNode = FocusNode();
+
   TextEditingController usermsg = TextEditingController();
   final _firebaseAuthService = locator<FirebaseAuthService>();
   final _firestoreService = locator<FirebaseFirestoreService>();
@@ -36,6 +38,7 @@ class GeminichatViewModel extends BaseViewModel {
 
   initialize(String promptName) {
     _promptName = promptName;
+    updateCurrentUSerData();
     // Load chat messages from Firebase
     loadChatMessages(currentPrompt);
     debugPrint("initialized");

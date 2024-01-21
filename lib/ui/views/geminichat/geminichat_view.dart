@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:stacked/stacked.dart';
 import 'package:virtuchat/ui/views/geminichat/geminichat_viewmodel.dart';
 
@@ -40,7 +41,9 @@ class GeminichatView extends StatelessWidget {
                     itemCount: viewModel.chatMessages.length,
                     itemBuilder: (context, index) {
                       return GestureDetector(
-                        onDoubleTap: () {},
+                        onDoubleTap: () {
+                          Share.share(viewModel.chatMessages[index]['message']);
+                        },
                         onLongPress: () {
                           Clipboard.setData(
                             ClipboardData(
@@ -53,17 +56,17 @@ class GeminichatView extends StatelessWidget {
                         },
                         child: Container(
                           alignment:
-                              viewModel.chatMessages[index]["role"] == "User"
+                              viewModel.chatMessages[index]["role"] == "Gemini"
                                   ? Alignment.centerLeft
                                   : Alignment.centerRight,
                           margin: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color:
-                                viewModel.chatMessages[index]["role"] == "User"
-                                    ? Colors.blue
-                                    : Colors.green,
+                            color: viewModel.chatMessages[index]["role"] ==
+                                    "Gemini"
+                                ? Colors.grey
+                                : Colors.blue,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -71,35 +74,43 @@ class GeminichatView extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  CircleAvatar(
-                                    backgroundImage:
-                                        viewModel.currentUserDPUrl.isNotEmpty
-                                            ? NetworkImage(
-                                                viewModel.currentUserDPUrl)
-                                            : null,
-                                    backgroundColor:
-                                        viewModel.currentUserDPUrl.isNotEmpty
-                                            ? Colors.transparent
-                                            : Colors.black,
-                                    radius: 20,
-                                    child: viewModel.currentUserDPUrl.isEmpty
-                                        ? Text(
-                                            viewModel.chatMessages[index]
-                                                        ["role"] ==
-                                                    "User"
-                                                ? viewModel.currentUserName
-                                                        .isNotEmpty
-                                                    ? viewModel
-                                                        .currentUserName[0]
-                                                    : 'U'
-                                                : "V",
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 20,
+                                  viewModel.chatMessages[index]["role"] ==
+                                          "Gemini"
+                                      ? const CircleAvatar(
+                                          backgroundColor: Colors.grey,
+                                          backgroundImage: ResizeImage(
+                                            width: 1800,
+                                            height: 1800,
+                                            AssetImage(
+                                              "assets/image/virtubot.png",
                                             ),
-                                          )
-                                        : null,
-                                  ),
+                                          ))
+                                      : CircleAvatar(
+                                          backgroundImage: viewModel
+                                                  .currentUserDPUrl.isNotEmpty
+                                              ? NetworkImage(
+                                                  viewModel.currentUserDPUrl)
+                                              : null,
+                                          backgroundColor: viewModel
+                                                  .currentUserDPUrl.isNotEmpty
+                                              ? Colors.transparent
+                                              : Colors.black,
+                                          radius: 20,
+                                          child:
+                                              viewModel.currentUserDPUrl.isEmpty
+                                                  ? Text(
+                                                      viewModel.currentUserName
+                                                              .isNotEmpty
+                                                          ? viewModel
+                                                              .currentUserName[0]
+                                                          : 'U',
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 20,
+                                                      ),
+                                                    )
+                                                  : null,
+                                        ),
                                   const SizedBox(
                                       width:
                                           8), // Add spacing between CircleAvatar and role/timestamp
@@ -109,14 +120,17 @@ class GeminichatView extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        viewModel.chatMessages[index]
-                                            ['role'], // Add role here
+                                        viewModel.chatMessages[index]['role'] ==
+                                                'Gemini'
+                                            ? "VertuBot"
+                                            : viewModel.chatMessages[index]
+                                                ['role'], // Add role here
                                         style: const TextStyle(
                                             color: Colors.white),
                                       ),
                                       Text(
                                         viewModel.chatMessages[index]
-                                                ["timestamp"]
+                                                ["datetime"]
                                             .toString(), // Add timestamp here
                                         style: const TextStyle(
                                           color: Colors.white,
@@ -181,6 +195,7 @@ class GeminichatView extends StatelessWidget {
                     children: [
                       Expanded(
                         child: TextField(
+                          focusNode: viewModel.messageFocusNode,
                           controller: viewModel.usermsg,
                           decoration: InputDecoration(
                             hintText: "Ask any thing...",
@@ -192,6 +207,29 @@ class GeminichatView extends StatelessWidget {
                           ),
                           maxLines: null,
                           keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: (value) async {
+                            if (!viewModel.isBusy) {
+                              if (viewModel.usermsg.text.isNotEmpty &&
+                                  viewModel.imageFile == null) {
+                                await viewModel.sendMessageOnlyText(
+                                    viewModel.usermsg.text);
+                                viewModel.usermsg.clear();
+                              } else if (viewModel.imageFile != null) {
+                                viewModel.getImagePath();
+                                // await viewModel.uploadImageToFirestorega();
+                                await viewModel.sendMessagewithImage(
+                                    viewModel.usermsg.text);
+                                viewModel.usermsg.clear();
+
+                                viewModel.imageFile = null;
+                                viewModel.imageUrl = "";
+                                // Hide the keyboard
+                                SystemChannels.textInput
+                                    .invokeMethod('TextInput.hide');
+                              }
+                            }
+                          },
 
                           // Implement text editing controller and handling user input
                         ),
@@ -235,6 +273,10 @@ class GeminichatView extends StatelessWidget {
                               viewModel.usermsg.clear();
 
                               viewModel.imageFile = null;
+                              viewModel.imageUrl = "";
+                              // Hide the keyboard
+                              SystemChannels.textInput
+                                  .invokeMethod('TextInput.hide');
                             }
                           }
                         },

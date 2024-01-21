@@ -16,7 +16,7 @@ class FirebaseFirestoreService {
   }
 
   Future<void> addMessage(String uid, String promptName, String senderId,
-      String message, String imageUrl, String role, String timestamp) async {
+      String message, String imageUrl, String role, String dateTime) async {
     await _firestore
         .collection('users')
         .doc(uid)
@@ -28,7 +28,8 @@ class FirebaseFirestoreService {
       'message': message,
       'role': role,
       'imageUrl': imageUrl,
-      'timestamp': timestamp,
+      'timestamp': FieldValue.serverTimestamp(),
+      'datetime': dateTime,
     });
   }
 
