@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -69,10 +68,71 @@ class GeminichatView extends StatelessWidget {
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
                             children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundImage:
+                                        viewModel.currentUserDPUrl.isNotEmpty
+                                            ? NetworkImage(
+                                                viewModel.currentUserDPUrl)
+                                            : null,
+                                    backgroundColor:
+                                        viewModel.currentUserDPUrl.isNotEmpty
+                                            ? Colors.transparent
+                                            : Colors.black,
+                                    radius: 20,
+                                    child: viewModel.currentUserDPUrl.isEmpty
+                                        ? Text(
+                                            viewModel.chatMessages[index]
+                                                        ["role"] ==
+                                                    "User"
+                                                ? viewModel.currentUserName
+                                                        .isNotEmpty
+                                                    ? viewModel
+                                                        .currentUserName[0]
+                                                    : 'U'
+                                                : "V",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 20,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                  const SizedBox(
+                                      width:
+                                          8), // Add spacing between CircleAvatar and role/timestamp
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        viewModel.chatMessages[index]
+                                            ['role'], // Add role here
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                      ),
+                                      Text(
+                                        viewModel.chatMessages[index]
+                                                ["timestamp"]
+                                            .toString(), // Add timestamp here
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(
+                                  height:
+                                      8), // Add spacing between timestamp and text message
                               Text(
-                                viewModel.chatMessages[index]['message'],
+                                viewModel.chatMessages[index]
+                                    ['message'], // Add text message here
                                 style: const TextStyle(color: Colors.white),
                               ),
                               if (viewModel.chatMessages[index]["imageUrl"]
@@ -83,16 +143,6 @@ class GeminichatView extends StatelessWidget {
                                       ["imageUrl"]),
                                   width: 90,
                                   height: 90,
-                                ),
-                              if (viewModel.chatMessages[index]["timestamp"] !=
-                                  null)
-                                Text(
-                                  viewModel.chatMessages[index]["timestamp"]
-                                      .toString(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
                                 ),
                             ],
                           ),

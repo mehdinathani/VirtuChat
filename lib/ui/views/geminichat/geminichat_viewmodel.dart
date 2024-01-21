@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:virtuchat/app/app.locator.dart';
@@ -16,6 +18,10 @@ class GeminichatViewModel extends BaseViewModel {
   final _geminiService = locator<GeminiService>();
   File? imageFile;
   String imageUrl = "";
+  String currentUserName = '';
+  String currentUserDPUrl = "";
+  String currentUserEmail = "";
+  late User user;
 
   final ScrollController controller = ScrollController();
 
@@ -103,6 +109,10 @@ class GeminichatViewModel extends BaseViewModel {
 
 // Helper method to add the user's message to Firebase Firestore
   Future<void> addMessage(String message, role) async {
+    DateTime now = DateTime.now();
+    String timestamp =
+        "${now.day}/${now.month} ${now.hour}:${now.minute}:${now.millisecond}";
+
     try {
       // Get the current user's UID
       String uid = _firebaseAuthService.auth.currentUser!.uid;
@@ -112,7 +122,7 @@ class GeminichatViewModel extends BaseViewModel {
 
       // Add the user's message to Firebase Firestore
       await _firestoreService.addMessage(
-          uid, currentPrompt, uid, message, imageUrl, role);
+          uid, currentPrompt, uid, message, imageUrl, role, timestamp);
 
       // Reload chat messages after adding a new message
       _loadChatMessages();
@@ -144,5 +154,23 @@ class GeminichatViewModel extends BaseViewModel {
     return chatMessages[index]["role"] == "User"
         ? Alignment.centerLeft
         : Alignment.centerRight;
+  }
+
+  updateCurrentUSerData() async {
+    user = _firebaseAuthService.auth.currentUser!;
+    if (user != null) {
+      // Fetch user details from Firestore using the UID
+      DocumentSnapshot userDoc = await _firestoreService.getUserDoc(user.uid);
+
+      if (userDoc.exists) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+
+        currentUserName = userData['displayName'] ?? "User";
+        currentUserDPUrl = userData['photoURL'] ?? "";
+        currentUserEmail = userData['email'] ?? "";
+
+        rebuildUi();
+      }
+    }
   }
 }

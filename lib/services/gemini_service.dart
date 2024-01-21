@@ -38,7 +38,7 @@ class GeminiService {
 
       // Store the message in Firestore
       await _firestoreService.addMessage(
-          uid, promptName, 'Gemini', value.text, "", 'Gemini');
+          uid, promptName, 'Gemini', value.text, "", 'Gemini', timestamp);
     } catch (error, stackTrace) {
       // Handle errors
       print('Error generating message: $error');
@@ -66,7 +66,7 @@ class GeminiService {
 
       // Store the message in Firestore
       await _firestoreService.addMessage(
-          uid, promptName, 'Gemini', value.text, "", "Gemini");
+          uid, promptName, 'Gemini', value.text, "", "Gemini", timestamp);
     } catch (error, stackTrace) {
       // Handle errors
       print('Error generating message: $error');

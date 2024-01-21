@@ -15,14 +15,8 @@ class FirebaseFirestoreService {
         .set({});
   }
 
-  Future<void> addMessage(
-    String uid,
-    String promptName,
-    String senderId,
-    String message,
-    String imageUrl,
-    String role,
-  ) async {
+  Future<void> addMessage(String uid, String promptName, String senderId,
+      String message, String imageUrl, String role, String timestamp) async {
     await _firestore
         .collection('users')
         .doc(uid)
@@ -34,7 +28,7 @@ class FirebaseFirestoreService {
       'message': message,
       'role': role,
       'imageUrl': imageUrl,
-      'timestamp': FieldValue.serverTimestamp(),
+      'timestamp': timestamp,
     });
   }
 
@@ -90,6 +84,7 @@ class FirebaseFirestoreService {
     String promptName,
     String messageId,
     String editedMessage,
+    String timestamp,
   ) async {
     await _firestore
         .collection('users')
@@ -100,7 +95,7 @@ class FirebaseFirestoreService {
         .doc(messageId)
         .update({
       'message': editedMessage,
-      'timestamp': FieldValue.serverTimestamp(),
+      'timestamp': timestamp,
     });
   }
 
