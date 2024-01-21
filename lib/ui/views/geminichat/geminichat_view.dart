@@ -24,6 +24,7 @@ class GeminichatView extends StatelessWidget {
         });
         return Scaffold(
           appBar: AppBar(
+            backgroundColor: const Color(0xff17C3CE),
             title: Text(
               viewModel.currentPrompt,
               style: const TextStyle(color: Colors.black),
@@ -31,6 +32,15 @@ class GeminichatView extends StatelessWidget {
           ),
           backgroundColor: Theme.of(context).colorScheme.background,
           body: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(
+                  "assets/image/bg1.jpg",
+                ),
+                fit: BoxFit.fill,
+                opacity: 0.5,
+              ),
+            ),
             padding: const EdgeInsets.only(left: 25.0, right: 25.0),
             child: Column(
               children: [

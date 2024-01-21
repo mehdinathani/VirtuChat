@@ -14,6 +14,7 @@ class HomeView extends StackedView<HomeViewModel> {
   ) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0xff17C3CE),
         centerTitle: true,
         title: const Text("VirtuChat"),
       ),
@@ -98,53 +99,69 @@ class HomeView extends StackedView<HomeViewModel> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25.0),
-          child: StreamBuilder<List<String>>(
-            stream: viewModel.getPrompts(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // Display loading indicator if prompts are still loading
-                return const Center(child: CircularProgressIndicator());
-              }
+        child: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                "assets/image/bg1.jpg",
+              ),
+              fit: BoxFit.fill,
+              opacity: 0.5,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 20),
+            child: StreamBuilder<List<String>>(
+              stream: viewModel.getPrompts(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  // Display loading indicator if prompts are still loading
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              if (snapshot.hasError) {
-                // Handle error state
-                return const Center(child: Text('Error loading prompts'));
-              }
+                if (snapshot.hasError) {
+                  // Handle error state
+                  return const Center(child: Text('Error loading prompts'));
+                }
 
-              // Extract the prompt list from the snapshot data
-              List<String> promptList = snapshot.data ?? [];
+                // Extract the prompt list from the snapshot data
+                List<String> promptList = snapshot.data ?? [];
 
-              if (promptList.isEmpty) {
-                // Display a message when prompt list is empty
-                return const Center(child: Text('No prompts available'));
-              }
+                if (promptList.isEmpty) {
+                  // Display a message when prompt list is empty
+                  return const Center(child: Text('No prompts available'));
+                }
 
-              // Display the prompt list using ListView.builder
-              return ListView.separated(
-                separatorBuilder: (context, index) => const Divider(),
-                itemCount: promptList.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () async {
-                      viewModel.updateCurrentPrompt(promptList[index]);
-                      await viewModel.navigateToGeminiChat();
-                    },
-                    child: ListTile(
-                      tileColor: const Color(0xff17C3CE),
-                      title: Text(promptList[index]),
-                      trailing: IconButton(
-                          onPressed: () async {
-                            await viewModel.deletePrompt(promptList[index]);
-                          },
-                          icon: const Icon(Icons.delete)),
-                      // Add any other information you want to display
-                    ),
-                  );
-                },
-              );
-            },
+                // Display the prompt list using ListView.builder
+                return ListView.separated(
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemCount: promptList.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () async {
+                        viewModel.updateCurrentPrompt(promptList[index]);
+                        await viewModel.navigateToGeminiChat();
+                      },
+                      child: ListTile(
+                        shape: Border.all(width: 2),
+                        tileColor: const Color(0xff17C3CE),
+                        title: Text(
+                          promptList[index],
+                          style: const TextStyle(
+                              fontSize: 30, fontWeight: FontWeight.bold),
+                        ),
+                        trailing: IconButton(
+                            onPressed: () async {
+                              await viewModel.deletePrompt(promptList[index]);
+                            },
+                            icon: const Icon(Icons.delete)),
+                        // Add any other information you want to display
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),
